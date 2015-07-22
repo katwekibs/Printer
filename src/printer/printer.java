@@ -11,6 +11,8 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 
@@ -163,16 +165,29 @@ public class printer extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
-    private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuItemActionPerformed
-
+    private PrintService getPreferedPrinter(String printerName) {
+        PrintService printer = null;
         PrintService[] printers = PrintServiceLookup.lookupPrintServices(null, null);
         if (printers.length > 0) {
             for (PrintService p : printers) {
-                System.out.println(p.getName());
+                if (p.getName().equals(printerName)) {
+                    printer = p;
+                }
             }
         }
+        return printer;
+    }
+    private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuItemActionPerformed
 
         PrinterJob job = PrinterJob.getPrinterJob();
+        PrintService printer = getPreferedPrinter("LK-TE202");
+        if (printer != null) {
+            try {
+                job.setPrintService(printer);
+            } catch (PrinterException ex) {
+                System.err.println("could not connect to a printer "+ printer.getName());
+            }
+        }
 
         job.setPrintable(new Printable() {
             @Override

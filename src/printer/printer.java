@@ -6,10 +6,13 @@ package printer;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
 
 /**
  *
@@ -161,32 +164,45 @@ public class printer extends javax.swing.JFrame {
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
     private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuItemActionPerformed
-        PrinterJob job = PrinterJob.getPrinterJob();
-        
-        job.setPrintable(new Printable() {
 
+        PrintService[] printers = PrintServiceLookup.lookupPrintServices(null, null);
+        if (printers.length > 0) {
+            for (PrintService p : printers) {
+                System.out.println(p.getName());
+            }
+        }
+
+        PrinterJob job = PrinterJob.getPrinterJob();
+
+        job.setPrintable(new Printable() {
             @Override
             public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-             
-                if(pageIndex > 0){
+
+                if (pageIndex > 0) {
                     return NO_SUCH_PAGE;
                 }
-                
-                Graphics2D g2d =  (Graphics2D) graphics;
-                g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-                
-                graphics.drawString("Hello world", 100, 100);
-                
+
+                Graphics2D g2d = (Graphics2D) graphics;
+                //g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+
+                Rectangle2D rect = new Rectangle2D.Double(
+                        pageFormat.getImageableX(),
+                        pageFormat.getImageableY(),
+                        pageFormat.getImageableWidth(),
+                        pageFormat.getImageableHeight());
+                g2d.draw(rect);
+                g2d.drawString("Hello world", 100, 100);
+
                 return PAGE_EXISTS;
             }
         });
-        
+
         boolean doPrint = job.printDialog();
-        if(doPrint){
-            try{
+
+        if (doPrint) {
+            try {
                 job.print();
-            }catch (PrinterException e){
-                
+            } catch (PrinterException e) {
             }
         }
     }//GEN-LAST:event_openMenuItemActionPerformed
